@@ -4,92 +4,102 @@
 var languageModule = function (functionMapping) {
 
 
-    return function (stringToParse) {
-
-        var parsedKeys
-          , parser
-          , output
-          , contentObject
+    var parser
+    
 
 
-        var result = "";
+    var Parser = function () {
+    }
+    Parser.prototype.parse = function (objMapping) {
+        console.log("Internal Parse. Now What?");
 
-        var Parser = function () {
-          
-           
-        }
-        Parser.prototype.parse = function (objMapping ) {
-            
-            console.log(objMapping );
+        // look for endfor
 
-            var pk = stringToParse.match( /{%\s*([\w\d\s\-\.]*)\s*%}/ )
-           
-            console.log("pk " + pk);
+        //single word token
+        match = this.stringToParse.match(/\{\%\s*[\w]+\s*\%\}/g)
 
-            var w = pk[1].split( /\s+/)
 
-            for (key in objMapping) {
+        for (key in objMapping) {
 
-                if (w[0] == key) {
+            for (m in match) {
 
-                   var foundParserFunc = objMapping[key];
+                if (m == key) {
 
-                   foundParserFunc( "endif" );
-
+                    console.log("LAST " + objMapping[key]);
                 }
+                    //arguments.callee.caller.call(objMapping[key]);
+
             }
 
 
         }
-        Parser.prototype.lookup = function (str) {
-            return this.contentObject[str] 
-        }
-        Parser.prototype.contentObject;
 
-        var parser = new Parser()
+
+        // look for endif 
+
+
+    }
+    //////////////// lookup(str) -> function(obj) -> str
+    Parser.prototype.lookup = function (str) {
+
+        // I guess i'm not sure what to return here
+
+        // in the tagFor context I try pumping in "items" to return the designated content object
+        // but it wants to invoke like a function
+
+
+        return this.contentObject[str]
+    }
+    Parser.prototype.mappingObject;
+
+    parser  = new Parser()
+
+    /////////////// instantiate Parser with the mapping object when the exported function is called
+    parser.mappingObject = functionMapping;
+
+
+    ///////////////// the language module returns a function representing a compiler for strings in that language
+    return function (stringToParse) {
+        // this is a compiler
+
+        parser.stringToParse = stringToParse;
+
+        var parsedKeys         
+          , output
+      
         
 
 
+        return function ( contentObject ) {
 
-        return function ( p_contentObject ) {
-
-            contentObject = p_contentObject
-
-            parser.contentObject = contentObject;
+            parser.contentObject = contentObject
             
-           
-            var lexicalPhrases = stringToParse.match(/{%\s*([\w\d\s\-\.]*)\s*%}/g)
-
-            console.log( parsedKeys )
 
 
-            for (phrase in lexicalPhrase) {
+            /////////////// match tags by specified {% %} selector
+            var match = stringToParse.match(/{%\s*([\w\d\s\-\.]*)\s*%}/)
+            var firstWord = match[1].split(/\s+/)[0]
 
-                var potentialOperator = phrase.replace('{%', '').replace('%}', '');
+            
 
+            for (key in functionMapping) {
 
-                var words = potentialOperator.split('/\s+/')
+                console.log(key + " == " + firstWord);
 
-                if( words[0] == functionMapping[ words
+                /////////////// see if there's a tag parser function defined by the first word in match[1]
+                if (key == firstWord) {
 
-                        var foundParserFunc = functionMapping[key];
+                    var foundFunc = functionMapping[key];
 
-                        result += foundParserFunc(parser, parsedKeys[1]);
+                    ///////////call that tag parser function with itself and match[1]
+                    var parserTag = foundFunc(parser, match[1]);
 
-                        console.log("a key");
+                    parserTag("items");
+                    // where "that" = mapped function. Is "itself" also "that". This is ambiguous. IT should be "our parser" and match[1] since lookup is not defined on the example
 
-                    }
                 }
+
             }
-
-
-
-
-
-         //   parser.parse(contentObject);
-
-            console.log(result);
-
 
         }
 

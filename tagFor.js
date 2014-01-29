@@ -1,5 +1,7 @@
 ﻿module.exports = function (parser, contents) {
 
+    console.log("In for parser");
+
     var bits = contents.split(/\s+/)  // ["for", "item", "in", "items"]
       , contextTarget = bits[1]
       , lookupContextVariable = parser.lookup(bits[3])
@@ -37,6 +39,8 @@
               , length: len
             }
             output.push(forBody(loopContext))
+
+            console.log("push to output");
         }
 
         return output.join('')
